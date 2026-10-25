@@ -129,18 +129,31 @@ def show_exam_result(request, course_id, submission_id):
     submitted_choices = submission.choices.all()
     questions = course.question_set.all()
 
-    total_grade = sum([q.grade for q in questions])
-    earned_grade = 0
+    total_score = 0
+    possible_score = 0
     for question in questions:
+        possible_score += question.grade
         if question.is_get_score(submitted_choices):
-            earned_grade += question.grade
+            total_score += question.grade
 
-    grade = int(round((earned_grade / total_grade * 100))) if total_grade > 0 else 100
+    grade = int(round((total_score / possible_score * 100))) if possible_score > 0 else 100
+
+    # List of selected choice IDs
+    selected_ids = list(submitted_choices.values_list('id', flat=True))
+
+    # List of all correct choice IDs across all questions
+    possible = list(
+        Choice.objects.filter(question__in=questions, is_correct=True).values_list('id', flat=True)
+    )
 
     context = {
         'course': course,
         'submission': submission,
         'submitted_choices': submitted_choices,
         'grade': grade,
+        'total_score': total_score,
+        'possible_score': possible_score,
+        'selected_ids': selected_ids,
+        'possible': possible,
     }
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)

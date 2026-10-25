@@ -102,8 +102,8 @@ class Enrollment(models.Model):
 # Question Model
 class Question(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    question_text = models.CharField(max_length=500, default="question")
-    grade = models.IntegerField(default=50)
+    question_text = models.TextField(default="question")
+    grade = models.IntegerField(default=1)
 
     @property
     def text(self):
@@ -143,4 +143,4 @@ class Submission(models.Model):
     choices = models.ManyToManyField(Choice)
 
     def __str__(self):
-        return f"Submission ID: {self.id} for {self.enrollment}"
+        return f"{self.enrollment.user.username} submission for {self.enrollment.course.name}"
